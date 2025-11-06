@@ -6,8 +6,6 @@
 [![Machine Learning](https://img.shields.io/badge/Machine%20Learning-Enabled-green)]()
 [![Status](https://img.shields.io/badge/Stage-Research%20Project-lightblue)]()
 
----
-
 ## Overview
 
 **AdaptiveKeyShield** is a security-focused framework that enhances communication privacy by combining **Machine Learning-based Intrusion Detection Systems (IDS)** with **Dynamic Cryptographic Key Management**.  
@@ -41,7 +39,6 @@ Our adaptive model automatically **rotates encryption keys** whenever an intrusi
   - KDD Cup 99
 - Detects malicious activity → triggers key regeneration event.
 
----
 
 ## Dynamic Key Rotation Process
 
