@@ -33,12 +33,7 @@ Our adaptive model automatically **rotates encryption keys** whenever an intrusi
 ### 3. Intrusion Detection System (IDS)'
 
 - Uses supervised ML algorithms to detect abnormal network or login patterns.
-- Trained on benchmark cybersecurity datasets:
-  - UNSW-NB15
-  - NSL-KDD
-  - KDD Cup 99
 - Detects malicious activity → triggers key regeneration event.
-
 
 ## Dynamic Key Rotation Process
 

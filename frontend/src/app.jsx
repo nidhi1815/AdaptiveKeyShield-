@@ -15,8 +15,6 @@ export default function App() {
         backgroundPosition: "center",
       }}
     >
-      {/* dark gradient overlay to improve contrast
-      <div className="absolute inset-0 bg-gradient-to-br from-[#001b35]/80 via-[#002b55]/60 to-[#0077b6]/40"></div> */}
 
       {/* content wrapper - z-10 so it sits above overlay */}
       <div className="relative z-10 w-full max-w-[1100px] px-6">

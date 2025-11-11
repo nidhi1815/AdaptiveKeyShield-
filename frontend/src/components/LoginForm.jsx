@@ -46,7 +46,7 @@ export default function LoginForm() {
           <a className="text-sm text-cyan-600" href="#">Forgot Password?</a>
         </div>
 
-        <button className="w-full py-2 rounded-md bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold">
+        <button className="w-full py-2 rounded-md bg-linear-to-r from-cyan-500 to-blue-600 text-white font-semibold">
           Login
         </button>
       </form>
