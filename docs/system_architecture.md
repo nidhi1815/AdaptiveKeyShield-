@@ -1,51 +1,68 @@
 ## System Architecture of Adaptive Cryptographic Key Management using Machine Learning-based Intrusion Detection
 
-The proposed system integrates a machine learning–based intrusion detection model with a dynamic cryptographic key management mechanism. 
+This project is a working demo that combines:
+- **ML-based Intrusion Detection (IDS)** (XGBoost pipeline trained on the included dataset)
+- **Adaptive key rotation** when an attack is detected
+- **Application-layer secure messaging demo** using **ECDH (P-256) + HKDF + AES-256-GCM**
 
-It ensures secure communication by continuously monitoring network behavior and automatically rotating encryption keys when an attack is detected.
+### High-level flow
 
 ```mermaid
 flowchart LR
-    A[Data Input] --> B[Intrusion Detection System]
-    B --> C[Key Management System]
-    C --> D[Secure Communication]
+    A[Frontend: User ID + Message] --> B[Crypto handshake: ECDH + HKDF]
+    B --> C[Encrypt message: AES-256-GCM]
+    C --> D[Backend: /predict]
+    D --> E[Decrypt message]
+    D --> F[IDS inference: XGBoost pipeline]
+    F -->|No attack| G[Keep key/session]
+    F -->|Attack| H[Rotate key + invalidate crypto session]
+    H --> I[Return new key_id + fingerprint]
+    G --> J[Return status]
 ```
 
-### Folder Structure
+### Implemented backend endpoints
+
+- **`GET /health`**: service health + current key id/fingerprint
+- **`GET /schema`**: returns valid categorical choices learned from the dataset (used by frontend to generate realistic demo inputs)
+- **`POST /handshake`**: ECDH (P-256) handshake; derives an AES key via HKDF and returns `session_id`
+- **`POST /predict`**: decrypts encrypted message (if provided), runs IDS inference, rotates key on intrusion
+- **`POST /rotate-key`**: manual key rotation (demo)
+
+> Note: Fingerprints are **hash-based** (SHA-256) and do not reveal secret key bytes.
+
+### Folder Structure (current)
 
 ```bash
-AdaptiveKeyShield/
-│
-|__ docs/
-├── backend/                                 # Python + Flask backend (security & ML logic)
-│   ├── app.py                               # Main Flask API server (handles login, IDS, key mgmt)
-│   ├── model/
-│   │   └── ids_model.pkl                    # trained ML model for Intrusion Detection System
-│   ├── crypto/
-│   │   ├── encrypt.py                       # Handles encryption/decryption (AES/RSA)
-│   │   └── key_rotation.py                  # Key rotation logic when anomaly is detected
-│   ├── requirements.txt                     # backend dependencies (Flask, cryptography, sklearn, etc.)
-│   └── README.md                            # Backend setup instructions
-│
-└── frontend/                                # React + Tailwind frontend (user interface)
-    ├── node_modules/                        # Installed npm dependencies (auto-generated)
-    ├── public/                              # Public static assets (favicons, manifest, etc.)
-    ├── src/                                 # Main React source code
-    │   ├── components/                      # Reusable UI building blocks
-    │   │   ├── LoginForm.jsx                # White login card — user enters ID & password
-    │   │   └── BackgroundPanel.jsx          # Transparent right panel — shows AI-powered features
-    │   ├── pages/                           # Page-level components (like dashboard, reports)
-    │   │   └── Dashboard.jsx                # Example dashboard for post-login view
-    │   ├── App.jsx                          # Combines login + background, sets global layout
-    │   ├── main.jsx                         # React entry file (renders <App /> to the DOM)
-    │   └── index.css                        # Tailwind base, components, utilities import
-    │
-    ├── index.html                           # Entry HTML file loaded by Vite
-    ├── package.json                         # Project dependencies + scripts (npm run dev/build)
-    ├── vite.config.js                       # Vite configuration (dev server, aliases, etc.)
-    ├── tailwind.config.js                   # Tailwind setup (content paths, theme, plugins)
-    ├── postcss.config.js                    # Enables Tailwind + autoprefixer for CSS
-    ├── package-lock.json                    # Dependency versions lockfile
-    └── README.md                            # Frontend setup guide (commands, tech stack, credits)
-
+AdaptiveKeyShield-/
+├── docs/
+│   ├── flowchart.md
+│   ├── system_architecture.md
+│   └── commands.md
+├── backend/
+│   ├── app.py                       # Flask API: /schema, /handshake, /predict, key rotation
+│   ├── train_ids_pipeline.py        # Trains & saves fitted ML pipeline
+│   ├── requirements.txt             # Backend dependencies
+│   ├── crypto/                      # (kept for organization; crypto is currently in app.py)
+│   └── model/
+│       ├── cybersecurity_intrusion_data.csv
+│       ├── be_project.ipynb
+│       ├── ids_pipeline.joblib      # Saved fitted pipeline (preprocess + XGBoost)
+│       ├── xgboost_model.pkl        # Older artifact (kept from notebook)
+│       └── scaler.pkl               # Older artifact (kept from notebook)
+└── frontend/
+    ├── src/
+    │   ├── App.jsx                  # Login → Welcome view flow + schema fetch
+    │   ├── main.jsx                 # React entry
+    │   ├── index.css                # Tailwind import
+    │   └── components/
+    │       ├── LoginForm.jsx        # Generates demo feature vector, encrypts message, calls /predict
+    │       └── BackgroundPanel.jsx  # Marketing/info panel
+    ├── package.json
+    └── vite.config.js
 ```
+
+### Configuration notes
+
+- Frontend uses `VITE_API_BASE_URL` (optional) to point to the backend.
+  - Default: `http://127.0.0.1:5000`
+
